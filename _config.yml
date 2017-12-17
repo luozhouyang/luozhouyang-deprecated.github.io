@@ -1,32 +1,33 @@
 title: ZhouYang Luo's Website
 name: ZhouYang Luo
 email: stupidme.me.lzy@gmail.com
-description: Welcome to my persnonal page. I will share my ideas with you in here.
+description: Welcome to my website. I will share my ideas with you in here.
 
 parallax_image_one: assets/images/background3.jpg # These are the images used for the parallax background
 parallax_image_two: assets/images/laptop.png
 
-project_one: "First Project"
-project_one_description: Describe your project!
-project_one_url: https://github.com/jameshamann/jekyll-material-theme
-project_one_icon: location_on
 
-project_two: Second Project
-project_two_description: Describe your project!
-project_two_url: https://github.com/jameshamann/jekyll-material-theme
-project_two_icon: photo_camera
+project_one: Gemini
+project_one_description: A blog website using Angular and beego.
+project_one_url: https://github.com/luozhouyang/gemini
+project_one_icon: star
 
 
-project_three: Third Project
-project_three_description: Describe your project!
-project_three_url: https://github.com/jameshamann/jekyll-material-theme
-project_three_icon: hotel
+project_two: SHU Campus
+project_two_description: A tool aplication running Android OS. It's still storaged in my old github account for now.
+project_two_url: https://github.com/StupidL/SHUCampus
+project_two_icon: school
+
+project_three: Embedded Tool
+project_three_description: An android application for emdedded developer. It's still storaged in my old github account for now.
+project_three_url: https://github.com/StupidL/EmbeddedTool
+project_three_icon: android
 
 
-project_four: Fourth Project
-project_four_description: Describe your project!
-project_four_url: https://github.com/jameshamann/jekyll-material-theme
-project_four_icon: restaurant
+project_four: TabPagerLayout
+project_four_description: An android custom view based on ViewPager and TabLayout. It's still storaged in my old github account for now.  
+project_four_url: https://github.com/StupidL/TabPagerLayout
+project_four_icon: android
 
 
 project_button: Github
