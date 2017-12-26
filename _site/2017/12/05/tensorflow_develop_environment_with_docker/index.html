@@ -1,0 +1,17 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"> <html><body> <div class="container"> <div class="col s10"> <div class="row" style="padding:10px;"> <a class="waves-effect waves-light btn white-text darken-2 grey z-depth-4" href="/#blog"><i class="material-icons">arrow_back</i></a> </div> <h3 class="post-title" itemprop="name headline" style="text-align:center">使用Docker搭建Tensorflow开发环境</h3> <p class="post-meta"> <time datetime="2017-12-05T05:15:05+08:00" itemprop="datePublished"> Dec 5, 2017 </time> </p> <div class="post-content" itemprop="articleBody"> <p>本文基于Ubuntu 16.04 LTS使用Docker来搭建Tensorflow的开发环境.</p> <p>Docker和Tensorflow就不用介绍了,项目均已开源在Github.</p> <ul> <li><a href="https://github.com/tensorflow/tensorflow">Tensorflow</a></li> <li><a href="https://github.com/docker/docker-ce">Docker CE</a></li> </ul> <h2 id="docker的安装">Docker的安装</h2> <p>Docker的安装在官方网站有非常详细的文档,请参考:<a href="https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/">Docker CE installation on Ubuntu</a><br> 本文只是做一个稍微简单一点的概述.</p> <h3 id="step-1-卸载旧版本">Step 1 卸载旧版本</h3> <p>使用如下命令:</p> <blockquote> <blockquote> <p><strong>sudo apt remove docker docker-engine docker.io</strong></p> </blockquote> </blockquote> <h3 id="step-2-安装docker-ce">Step 2 安装Docker CE</h3> <p>依次使用如下命令:</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt update  
+<span class="nb">sudo </span>apt install <span class="se">\ </span> 
+    apt-transport-https <span class="se">\ </span> 
+    ca-certificates <span class="se">\ </span> 
+    software-properties-common  
+curl <span class="nt">-fsSL</span> https://download.docker.com/linux/ubuntu/gpg | <span class="nb">sudo </span>apt-key add -  
+<span class="c"># 验证指纹  </span>
+<span class="nb">sudo </span>apt-key fingerprint 0EBFCD88  
+<span class="c"># X86_64/amd64平台    </span>
+<span class="nb">sudo </span>add-apt-repository <span class="se">\ </span> 
+   <span class="s2">"deb [arch=amd64] https://download.docker.com/linux/ubuntu </span><span class="se">\ </span><span class="s2"> 
+   </span><span class="k">$(</span>lsb_release <span class="nt">-cs</span><span class="k">)</span><span class="s2"> </span><span class="se">\ </span><span class="s2"> 
+   stable"</span>  
+<span class="c"># 安装Docker CE  </span>
+<span class="nb">sudo </span>apt update  
+<span class="nb">sudo </span>apt install docker-ce  
+</code></pre></div></div> <p>至此,Docker CE已经通过apt源安装在机器上了.</p> </div> </div> </div> </body></html>
