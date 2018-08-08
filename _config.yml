@@ -1,55 +1,50 @@
-title: ZhouYang Luo's Website
-name: ZhouYang Luo
-email: stupidme.me.lzy@gmail.com
-description: Welcome to my website. I will share my ideas with you in here.
+title: Sleek # your site title
+author: GitHub User
+email: your-email@domain.com # email for form submission, you also have to change it in _js/scripts.js
+description: > # this means to ignore newlines until "baseurl:"
+  Write an awesome description for your new site here. You can edit this
+  line in _config.yml. It will appear in your document head meta (for
+  Google search results) and in your feed.xml site description.
+baseurl: "/" # the subpath of your site, e.g. /blog
+url: "https://janczizikow.github.io/sleek" # the base hostname & protocol for your site, e.g. http://example.com
+twitter_username: jan_czizikow # replace with your_twitter_username or comment to remove link from footer
+github_username:  janczizikow # replace with your_github_username or comment to remove link from footer
+instagram_username: shanlongjj # replace with your_instagram_username or comment to remove link from footer
+social:
+  name: Your Name
+  links:
+    - https://twitter.com/BenBalter
+    - https://www.facebook.com/ben.balter
+    - https://www.linkedin.com/in/BenBalter
+    - https://plus.google.com/+BenBalter
+    - https://github.com/benbalter
+    - https://keybase.io/benbalter
 
-parallax_image_one: assets/images/background3.jpg # These are the images used for the parallax background
-parallax_image_two: assets/images/laptop.png
-
-
-project_one: Gemini
-project_one_description: A blog website using Angular and beego.
-project_one_url: https://github.com/luozhouyang/gemini
-project_one_icon: star
-
-
-project_two: SHU Campus
-project_two_description: A tool aplication running Android OS. It's still storaged in my old github account for now.
-project_two_url: https://github.com/StupidL/SHUCampus
-project_two_icon: school
-
-project_three: Embedded Tool
-project_three_description: An android application for emdedded developer. It's still storaged in my old github account for now.
-project_three_url: https://github.com/StupidL/EmbeddedTool
-project_three_icon: android
-
-
-project_four: TabPagerLayout
-project_four_description: An android custom view based on ViewPager and TabLayout. It's still storaged in my old github account for now.  
-project_four_url: https://github.com/StupidL/TabPagerLayout
-project_four_icon: android
-
-
-project_button: Github
-
-github: https://github.com/luozhouyang
-medium: https://medium.com
-
-baseurl: # if your site is located at /blog or /home, enter it here, otherwise leave it as '/'
-url: http://localhost:4000/ #the url of your site
-
-google_analytics_tracking_id: # This looks something like UA-000000000-0 Head over to https://analytics.google.com/ to setup.
-
-cookies_banner: none # The value "show" will show the cookies banner, the value "none" will hide the banner.
-
-cookie_accept_message: Thanks!
+disqus:
+  shortname: janczizikow # to enable comments replace with your_disqus_shortname
 
 # Build settings
 markdown: kramdown
-# theme: minima
-permalink: pretty
-plugins:
-  - jekyll-feed
-  - jekyll-assets
-  - jekyll-minifier
+highlighter: rouge # or pygments or null
+theme: jekyll-sleek
+exclude:
+  - README.md
+  - node_modules
+  - package.json
+  - package-lock.json
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - npm-debug.log
+  - gulpfile.js
+  - sleek.png
 
+include: ['_pages']
+permalink: /:title/
+
+compress_html:
+  clippings: all
+
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
