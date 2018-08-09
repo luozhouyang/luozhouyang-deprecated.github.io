@@ -5,8 +5,6 @@ summary: Word Embedding到底是什么？TensorFlow NMT中又是如何使用词�
 featured-img: sleek
 ---
 
-#   
-> 声明：本文由 罗周杨 stupidme.me.lzy@gmail.com 原创，未经授权不得转载  
 
 自然语言处理的第一步，就是要将文本表示成计算机能理解的方式。我们将长文本分词之后，得到一个词典，对于词典中的每一个词，我们用一个或者一组数字来表示它们。这样就实现了我们的目标。 
 ## Embedding(词嵌入)到底是什么

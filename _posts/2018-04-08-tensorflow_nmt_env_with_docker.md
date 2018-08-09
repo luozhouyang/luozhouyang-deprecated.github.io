@@ -189,11 +189,5 @@ $ nvidia-docker run -it -p 8888:8888 tensorflow/tensorflow:latest-gpu-py3 bash
 
 至此，tensorflow gpu版本的开发环境已经配置好了！可以进行开发了！
 
-## 联系我  
-如果你发现博客内容有不对或者说的不清楚的地方,请联系我,我将第一时间改正,尽我的最大能力将问题讲清楚.  
-我的邮箱: [stupidme.me.lzy@gmail.com](mailto:stupidme.me.lzy@gmail.com)  
 
-以下是我的公众号，不定期和大家分享技术文章．如果你觉得我的文章对你有帮助，麻烦关注一下哟：
-
-![stupidmedotme](wechat_gzh_code_8.jpg)  
 
