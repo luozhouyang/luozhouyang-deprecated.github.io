@@ -69,7 +69,7 @@ sigmoid函数有很多很好的性质：
 
 至此，我们可以计算类别`0`和类别`1`的概率：
 
-$$P(y=1) = \sigma(w\cdot x +b) = \frac{1}{1+e^{-(w\cot x+b)}}$$
+$$P(y=1) = \sigma(w\cdot x +b) = \frac{1}{1+e^{-(w\cdot x+b)}}$$
 
 $$P(y=0) = 1-P(y=1) = 1-\sigma(w\cdot x+b) = 1-\frac{1}{1+e^{-(w\cdot x+b)}} = \frac{e^{-(w\cdot x+b)}}{1+e^{-(w\cdot x+b)}}$$
 
@@ -77,7 +77,7 @@ $$P(y=0) = 1-P(y=1) = 1-\sigma(w\cdot x+b) = 1-\frac{1}{1+e^{-(w\cdot x+b)}} = \
 
 说到损失函数，你可能会想到**均方差损失(MSE)**：
 
-$$L_{\text{MSE}}(\hat{y},y) = \frac{1}{1}(\hat{y}-y)^2$$
+$$L_{\text{MSE}}(\hat{y},y) = \frac{1}{2}(\hat{y}-y)^2$$
 
 这个损失在线性回归里面用的很多，但是将它应用于概率分类的话，就变得难以优化了（主要是非凸性）。
 
@@ -91,7 +91,7 @@ $$p(y\vert x) = \hat{y}^y(1-\hat{y})^{1-y}$$
 
 由此，可以得到**对数概率**：
 
-$$\log p(y\vert x) = \log\left[\hat{y}^y(1-\hat{y})^{1-y}\right] = y\log\hat{y}+(1-y)\log(1-\hat{y})$$
+$$\log p(y\vert x) = \log[\hat{y}^y(1-\hat{y})^{1-y}] = y\log\hat{y}+(1-y)\log(1-\hat{y})$$
 
 我们的训练过程就是要最大化这个对数概率。如果对上式两边取负数，最大化问题就变成了最小化问题，即训练的目标就是最小化：
 
@@ -103,7 +103,7 @@ $$L_{CE}=-[y\log\sigma(w\cdot x+b)+(1-y)\log(1-\sigma(w\cdot x+b))]$$
 
 这也就是我们的**交叉熵损失(cross-entorpy loss)**，至于为什么是这个名称，因为上述公式就是：**$y$的概率分布和估计分布$\hat{y}$之间的交叉熵**。
 
-所以，在整个数据集上，我们可以得到平均损失为：
+所以，在整个批量的数据上，我们可以得到平均损失为：
 
 $$Cost(w,b) = \frac{1}{m}\sum_{i=1}^mL_{CE}(\hat{y}^{(i)},y^{(i)}) = -\frac{1}{m}\sum_{i=1}^m y^{(i)}\log\sigma(w\cdot x^{(i)}) + (1-\hat{y}^{(i)})\log(1-\sigma(w\cdot x^{(i)}+b))$$
 
@@ -138,4 +138,104 @@ $$w^{t+1} = w^t - \eta\frac{\partial}{\partial w}f(x;w)$$
 那么，我们的参数更新就是：
 
 $$\theta_{t+1}=\theta_t - \eta\nabla L(f(x;\theta),y)$$
+
+## Logistic Regression的梯度
+
+逻辑回归的损失如下：
+
+$$L_{CE}(w;b)=-[y\log\sigma(w\cdot x+b)+(1-y)\log(1-\sigma(w\cdot x+b))]$$
+
+我们有：
+
+$$\frac{\partial L_{CE}(w,b)}{\partial w_j} = [\sigma(w\cdot x+b)-y]x_j$$
+
+对于一个批量的数据，我们的梯度如下：
+
+$$\frac{\partial Cost(w,b)}{\partial w_j} = \sum_{i=1}^m[\sigma(w\cdot x^{(i)}+b)-y^{(i)}]x_j^{(i)}$$
+
+## 正则化
+上面训练的模型可能会出现**过拟合(overfitting)**，为了解决这个问题，我们需要一项技术，叫做**正则化(regularization)**。
+
+正则化是对权重的一种约束，更细致一点地说，是在以最大化对数概率$\log P(y\vert x)$的前提下，对权重$w$的约束。
+
+所以我们的目标可以用下面的公式描述：
+
+$$\hat{w} = \mathop{\arg\max}_w\sum_{i=1}^m\log P(y^{(i)}\vert x^{(i)})-\alpha R(w)$$
+
+其中，$R(w)$就是**正则项(regularization term)**。
+
+上式可以看出，正则项是为了惩罚大的权重。我们总是倾向于，在效果差不多的模型中，选择$w$更少的那一个。所谓$w$更少就是$w$的特征更少，即指$w$的向量中0的个数更多的。
+
+常用的正则化方式有**L2正则**和**L1正则**。
+
+L2正则计算的是欧氏距离，公式如下：
+
+$$R(W) = ||W||^2 = \sum_{j=1}^Nw_j^2$$
+
+L1正则计算的是马哈顿距离，公式如下：
+
+$$R(W) = ||W||_1 = \sum_{i=1}^N|w_i|$$
+
+那么L2正则和L1正则有什么优缺点呢？
+
+* L2正则比较容易优化，因为它的导数就是$2w$，而L1的导数在0出不连续
+* L2正则更偏向于需要小的权重值，L1正则更偏向于某些权重值更大，但是同时也更多的权重值为0，也就是说L1正则化的结果倾向于稀疏的权重矩阵。
+
+L1和L2正则都有贝叶斯解释。L1正则可以解释为权重的Laplace先验概率，L2正则对应这样一个假设：权重的分布是一个均值为0($\mu = 0$)的正态分布。
+
+权重的高斯分布如下：
+
+$$\frac{1}{\sqrt{2\pi\sigma_j^2}}\exp(-\frac{(w_j-\mu_j)^2}{2\mu_j^2})$$
+
+根据Bayes法则，我们的权重可以用以下公式估算：
+
+$$\hat{w} = \mathop{\arg\max}_w\prod_{i=1}^M P(y^{(i)}\vert x^{(i)})\times P(w)$$
+
+使用上面的高斯分布计算先验概率$P(w)$，可以得到：
+
+$$\hat{w} = \mathop{\arg\max}_w\prod_{i=1}^M P(y^{(i)}\vert x^{(i)})\times \prod_{j=1}^n\frac{1}{\sqrt{2\pi\sigma_j^2}}\exp(-\frac{(w_j-\mu_j)^2}{2\mu_j^2})$$
+
+我们让$\mu = 0$，$2\sigma^2 = 1$，取对数，则有：
+
+$$\hat{w} = \mathop{\arg\max}\sum_{i=1}^m\log P(y^{(i)}\vert x^{(i)})-\alpha\sum_{j=1}^nw_j^2$$
+
+## Multinomial logistic regression
+
+上面我们讨论的都是二分类问题，如果我们想要多分类呢？这个时候就需要**Multinomial logistic regression**了，这种多分类也叫作**softmax regression**或者**maxent classifier**。
+
+多分类的类别集合就是不$[0,1]$两种了，所以我们更换一个给输出结果计算概率的函数，用来替代sigmoid,那就是sigmoid的泛华版本**softmax**。
+
+$$\text{softmax}(z_j) = \frac{e^{z_i}}{\sum_{j=1}^ke^{z_j}}$$
+
+其中，$1\leq i \leq k$。
+
+所以，对于输入
+
+$$z = [z_1,z_2,\dots,z_k]$$
+
+我们有：
+
+$$\text{softmax} = [\frac{e^{z_1}}{\sum_{i=1}^ke^{z_i}},\frac{e^{z_2}}{\sum_{i=1}^ke^{z_i}},\dots,\frac{e^{z_k}}{\sum_{i=1}^ke^{z_i}}]$$
+
+显然，softmax函数的分母是一个累加，因此softmax对于每一个输入，都输出一个概率值，并且所有输入的概率值和为1！
+
+和sigmoid类似，把$z=w\cdot x+b$带入：
+
+$$p(y=c\vert x) = \frac{e^{w_c\cdot x+b_c}}{\sum_{j=1}^k e^{w_j\cdot x+b_j}}$$
+
+注意的是，我们的$w$和$b$都是对应此时的分类的，所以写成$w_c$和$b_c$。
+
+同样的，我们的损失函数也变成了泛化版本：
+
+$$L_{CE}(\hat{y},y) = -\sum_{k=1}^K 1\{y=k\}\log p(y=k\vert x) = -\sum_{k=1}^K 1\{y=k\}\log\frac{e^{w_k\cdot x+b_k}}{\sum_{j=1}^Ke^{w_j\cdot x+b_j}}$$
+
+其中，`1{y=k}`表示$y=k$时值为1，否则为0。
+
+因此，可以得到下面的导数(没有推导过程)：
+
+$$\frac{\partial L_{CE}}{\partial w_k} = (1\{y=k\} - p(y=k\vert x))x_k = (1\{y=k\}-\frac{e^{w_k\cdot x+b_k}}{\sum_{j=1}^Ke^{w_j\cdot x+b_j}})x_k$$
+
+## 思考题
+
+* logistic regression和神经网络是不是很相似呢？你能说出它们的异同吗？
 
