@@ -4,36 +4,49 @@ title: About
 permalink: /about/
 ---
 
-## 基本信息
+罗周杨，男，1995。
 
-罗周杨，男，1995，双子座
+2017年7月，本科毕业于[ 上海大学 ](http://www.shu.edu.cn/)，专业为 `通信学院-电子信息工程`。
 
-软件开发工程师@51job
+熟悉Java，从大二开始学习Android开发至今，已有4年使用经验。
 
-上海大学　通信学院　电子信息工程
+目前主力使用python，用于NLP相关的深度学习模型研究。是一个 **Tensorflow Boy**。
 
-## 个人技能
-
-打字员，擅长字体：
-
-* 熟悉Java，了解并发，熟悉常用设计模式，3年使用经验
-* 熟悉Android应用开发，1.5年开发经验
-* 熟悉Docker使用，项目均使用Docker部署
-* 熟悉Python使用，一年使用经验
-* 了解Golang，有一定的使用经验
-* 熟悉深度学习（自然语言处理方向），熟悉RNN，包括LSTM、GRU等变体，seq2seq模型及其encoder-decoder架构
+目前在[ ifchange ](https://www.ifchange.com)担任算法工程师。
 
 
-## 开源项目
+## 开源
+  
+* [luozhouyang/python-string-similarity](https://github.com/luozhouyang/python-string-similarity)
 
-* [luozhouyang/naivenmt](https://github.com/luozhouyang/naivenmt)一个NMT(神经网络机器翻译)的实现，重构Google的tensorflow/nmt项目，增加模型导出到Serving，增加Transformer模型。欢迎大家一起来完善这个项目。
-* [luozhouyang/python-string-similarity](https://github.com/luozhouyang/python-string-similarity)Python实现的十多种相似度算法（参考Java实现）。  
+常见的字符串相似度的十余种算法实现。
 
-## 联系我
+  
+* [luozhouyang/dssm](https://github.com/luozhouyang/dssm)
 
-* WeChat: luozhouyang0528
-* Email : stupidme.me.lzy@gmail.com
+Deep Senmatic Similarity Model的Tensorflow实现。
 
-## 其他
+  
+* [luozhouyang/matchpyramid](https://github.com/luozhouyang/matchpyramid)
 
-* [代码玩乐场-罗周杨的个人博客](http://blog.stupidme.me)（暂时下线）
+MatchPyramid的Tensorflow实现。
+
+  
+* [naivnmt/datasets](https://github.com/naivenmt/datasets)
+
+Tensorflow实现的常用的高效数据输入管道工具包。
+
+* [naivenmt/naivenmt](https://github.com/naivenmt/naivenmt)
+  
+NMT的tensorflow实现，还没有完成，接下来打算使用tensorflow 2.x重新实现。
+
+
+## 博客
+
+[博客主页](https://luozhouyang.github.io)
+
+## 欢迎和我交流
+
+微信： **luozhouyang0528**
+
+邮箱： **zhouyang.luo@gmail.com**
