@@ -9,88 +9,156 @@ featured-img: emile-perron-190221
 
 最近，自己也想理一遍Attention机制，因此写了这篇笔记。
 
-## seq2seq模型
+其实谷歌爸爸的教程提供了非常清晰的介绍：
 
-**seq2seq** 模型生于语言模型领域，目标是将一个输入序列转化成另一个序列，他们可能有不一样的长度。
+* [BahdanauAttention - NMT with attention](https://www.tensorflow.org/beta/tutorials/text/nmt_with_attention)
+* [MultiHeadAttention - Transformer](https://www.tensorflow.org/beta/tutorials/text/transformer)
 
-传统的seq2seq模型通常都是使用encoder-decoder架构：
+仔细看完两个教程，我们可以归纳一下要点：
 
-* encoder处理输入序列并将这些信息压缩到一个 **固定大小** 的向量中，这个向量就是 **Context Vector**。当然有些地方会有其他称呼，但是本质是一样的。我们希望这个向量能够很好地表示整个输入序列的意义。
-* decoder使用上面的context vector进行初始化，并且产生输出。早期的实现是，把encoder的最后一个输出作为decoder的初始状态。也就是说，我们的context vector是通过encoder的最后一个state生成的。
+* Attention机制可以抽象为`Q`、`K`、`V`三个张量的计算
+* 不同Attention机制的区别在于`Q`、`K`、`V`三个张量的选择，和其中`score`函数的选择
 
-典型地，encoder和decoder都是一个RNN网络，比如使用 **LSTM** 或者 **GRU** 等标准RNN的变体。
-
-这个经典的架构，如下图所示：
-![seq2seq exmaple](/assets/art/encoder_decoder_example.png)
-
-很显然，这种 **固定长度的** context vector有一个缺点，那就是不太适合处理长序列。通常的情况是，这个context vector会遗忘比较早的信息。而我们的 **注意力机制** 就是来解决这个问题的。
-
-## attention机制
-
-那么，attention机制有哪些不一样呢？
-
-请看下图：
-![attention](/assets/art/encoder_decoder_attention.png)
-
-可以看到，这里的Context Vector和之前的不一样了。
-
-之前的context vector由encoder的最后一个state产生，而这里的context vector与所有的encoder state都有联系。
-
-**attention layer** 实际上是一个含有一个隐藏层的前馈网络。
-
-我们的输入$$\mathbf{x}$$是一个长度为n的序列，输出$$\mathbf{y}$$是一个长度为m的序列：
-
-$$\mathbf{x} = [x_1,x_2,\dots,x_n]$$
-
-$$\mathbf{y} = [y_1,y_2,\dots,y_m]$$
+我们分别从`Q`、`K`、`V`张量的选择和`score`函数的选择两个角度来分别分析Attention机制的异同。
 
 
-encoder使用的是 **双向RNN**，对于每一个方向，都有一个hidden state，我们把两个hidden state合并在一起，作为encoder的state:
+## `Q`、`K`、`V`张量的选择
 
-$$\boldsymbol{h}_i = [\overrightarrow{\boldsymbol{h}}_i^\top; \overleftarrow{\boldsymbol{h}}_i^\top]^\top, i=1,\dots,n$$
+我准备用`Transformer`和`NMT with Attention`两个经典的网络来分析，就如谷歌爸爸的教程一样。
 
-decoder的hidden state计算方法如下：
+### Transformer的Attention机制
 
-$$\boldsymbol{s}_t = f(\boldsymbol{s}_{t-1},y_{t-1},\mathbf{c}_t)$$
+我们首先看一下**Transformer**的`Scaled dot-product Attention`的实现：
 
-其中，$$\boldsymbol{s}_{t-1}$$ 是前一时刻的hidden state。$$y_{t-1}$$是前一时刻的输入.
-$$\mathbf{c}_t$$是当前时刻的 **context vector**。
+```python
+def scaled_dot_product_attention(q, k, v, mask):
+  """Calculate the attention weights.
+  q, k, v must have matching leading dimensions.
+  k, v must have matching penultimate dimension, i.e.: seq_len_k = seq_len_v.
+  The mask has different shapes depending on its type(padding or look ahead) 
+  but it must be broadcastable for addition.
+  
+  Args:
+    q: query shape == (..., seq_len_q, depth)
+    k: key shape == (..., seq_len_k, depth)
+    v: value shape == (..., seq_len_v, depth_v)
+    mask: Float tensor with shape broadcastable 
+          to (..., seq_len_q, seq_len_k). Defaults to None.
+    
+  Returns:
+    output, attention_weights
+  """
 
-当前时刻的context vector计算方法如下：
+  matmul_qk = tf.matmul(q, k, transpose_b=True)  # (..., seq_len_q, seq_len_k)
+  
+  # scale matmul_qk
+  dk = tf.cast(tf.shape(k)[-1], tf.float32)
+  scaled_attention_logits = matmul_qk / tf.math.sqrt(dk)
 
-$$\mathbf{c}_t=\sum_{i=1}^n\alpha_{t,i}\boldsymbol{h}_i$$
+  # add the mask to the scaled tensor.
+  if mask is not None:
+    scaled_attention_logits += (mask * -1e9)  
 
-其中，$$\alpha_{t,i}$$代表$$y_t$$和$$x_i$$的对齐程度，实际上就是alignment score，就是一个权重，这个权重就是softmax得分。如下公式所示：
+  # softmax is normalized on the last axis (seq_len_k) so that the scores
+  # add up to 1.
+  attention_weights = tf.nn.softmax(scaled_attention_logits, axis=-1)  # (..., seq_len_q, seq_len_k)
 
-$$
-\alpha_{t,i}  = \text{align}(y_t,x_i)  = \frac{\text{score}(\boldsymbol{s}_t,\boldsymbol{h}_{i})}{\sum_{i'=1}^n\text{score}(\boldsymbol{s}_t,\boldsymbol{h}_{i'})} 
-$$
+  output = tf.matmul(attention_weights, v)  # (..., seq_len_q, depth_v)
 
-alignment model对于每一对输入$$x_i$$和$$y_t$$计算一个得分$$\alpha_{t,i}$$，那么这些$$\alpha$$的集合，就是定义了每一个输出被每一个hidden state影响了多少（也就是注意力在每一个hidden state上的分布）的权重矩阵。
+  return output, attention_weights
+```
 
-那么，上面的分数函数score怎么计算呢？Bahdanau的论文表示，这个分数$$\alpha$$是被一个前馈网络参数化的，这个网络含有一个隐藏层。网络使用tanh激活函数：
+代码十分清晰，我们可以看到，`Scaled dot-product attention`的三个参数`Q`、`K`、`V`刚好一一对应我们的归纳的第一点的三个张量，并且`score`函数，选择的是`dot-product`，然后乘以一个**缩放因子**`1/tf.math.sqrt(dk)`。所以有了`Scaled dot-product Attention`的名字。
 
-$$\text{score}(\boldsymbol{s}_t, \boldsymbol{h}_i) = \mathbf{v}_a^\top \tanh(\mathbf{W}_a[\boldsymbol{s}_t; \boldsymbol{h}_i])$$
+那么，Transformer里面还有`MultiHeadAttention`和`Self-Attention`的概念，它们和`Scaled dot-product Attention`有什么联系呢？
 
-其中，$$\mathbf{v}_\alpha$$和$$\mathbf{W}_\alpha$$都是这个alignment model的权值矩阵。
+其实很简单 ：
 
-传统的方法，处理输入序列和输出序列长度不同的情况，都要面临对齐这个问题。但是我们的attention机制，有一个很好的副产品，那就是 **自动进行了对齐**！
+* `Self Attention`就是一种特殊的`Scaled dot-product Attention`，它的`Q == K == V`！
+* `MultiHeadAttention`是分成多头之后，每个头进行`Scaled dot-product Attention`！
 
-上述的attention叫做 **加性注意力机制(additive attention)**，[tensorflow/nmt](https://github.com/tensorflow/nmt)项目使用的就是这种attention机制。
+注：
+> 在Transformer里面，`Scaled dot-product Attention`不仅仅表现为`Self Attention`，对于`Encoder`和`Decoder`之间的Attention计算，也使用的是`Scaled dot-product  Attention`，只不过它的`Q`、`K`、`V`并不是完全一样的，我个人在Transformer的语境下更倾向于称之为`Context Attention`。
 
-Google 2017年的论文[Attention Is All You Need](http://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf)提出的Transormer模型，使用的是另一种attention机制，叫做 **点积注意力机制(dot-product attention)**。
+Transformer的Attention机制你应该非常清楚了！
 
-本文开始提到的文章，有一个attention机制的表格，非常全面：
+
+### NMT的Attention机制
+
+你可能还会想到另外一个经典的NMT使用的Attention机制。实际上，在NMT里有两种比较常用的Attention，在tensorflow里称为：
+
+* `BahdanauAttention`
+* `LuongAttention`
+
+它们都是用人名命名的Attention机制。对于`tensorflow 1.x`的源代码，你可以看到具体的实现。
+
+我们在这里只分析前一种`BahdanauAttention`，搞懂了这个，你可以对照源码去分析一下`LuongAttention`，就当作练习！
+
+开头提到的**nmt with attention**一文中使用的是`BahdanauAttention`，这种Attention有什么特点呢？
+
+它的代码实现如下：
+
+```python
+class BahdanauAttention(tf.keras.Model):
+  def __init__(self, units):
+    super(BahdanauAttention, self).__init__()
+    self.W1 = tf.keras.layers.Dense(units)
+    self.W2 = tf.keras.layers.Dense(units)
+    self.V = tf.keras.layers.Dense(1)
+
+  def call(self, query, values):
+    # hidden shape == (batch_size, hidden size)
+    # hidden_with_time_axis shape == (batch_size, 1, hidden size)
+    # we are doing this to perform addition to calculate the score
+    hidden_with_time_axis = tf.expand_dims(query, 1)
+
+    # score shape == (batch_size, max_length, 1)
+    # we get 1 at the last axis because we are applying score to self.V
+    # the shape of the tensor before applying self.V is (batch_size, max_length, units)
+    score = self.V(tf.nn.tanh(
+        self.W1(values) + self.W2(hidden_with_time_axis)))
+
+    # attention_weights shape == (batch_size, max_length, 1)
+    attention_weights = tf.nn.softmax(score, axis=1)
+
+    # context_vector shape after sum == (batch_size, hidden_size)
+    context_vector = attention_weights * values
+    context_vector = tf.reduce_sum(context_vector, axis=1)
+
+    return context_vector, attention_weights
+```
+
+我们发现，这种attention只接受两个参数，分别是`Q`、`V`两个张量。我们刚刚说Attention是`Q`、`K`、`V`三个张量的计算，那么它的`K`去哪里了呢？
+
+我们首先理解一下一般的`Q`、`K`、`V`之间的计算逻辑：
+
+* 用`Q`和`K`进行计算，得到`score`，这一步也就是我们所说的`score`函数
+* 对`score`函数进行`softmax`归一化，得到`attention weights`
+* 用`attention_weights`和`V`进行计算，得到输出
+
+这三个步骤是黄金法则，Transformer里面的`Scaled dot-product Attention`是这么计算的，我们这里的`BahdanauAttention`也是。
+
+在`BahdanauAttention`里：
+
+* `score`函数的`values`就是步骤一的`K`
+* `score`函数的`hidden_with_time_axis`就是步骤一中的`Q`
+* `score`函数就是`K`和`Q`线性变换后，相加，经过`tanh`激活，再次线性变换得到的，对应步骤二
+* `attention_weights`就是对`score`进行`softmax`归一化，也是步骤二
+* 输出就是`attention_weights`和`V`相乘，对应步骤三
+
+看吧，其实不同的Attention机制，都是按照这个规律来的。
+
+## `score`函数的选择
+
+上面一小节我们看到了`Q`、`K`、`V`的选择对应的不同的Attention机制，这里我们再介绍一点关于`score`函数的选择。
+
+其实上面一小节，我也介绍了两种Attention机制的`score`函数的不同，这里我就用文章开头的博客链接的一张图，作为展示：
+
 ![attention mechanism table](/assets/art/attention_mechanism_table.png)
 
-所谓的 **additive attention** 意思是 **将输入序列的hidden state和输出序列的hidden state合并在一起**。即
 
-$$\mathbf{W}_\alpha[\boldsymbol{s}_t;\boldsymbol{h}_i]$$
+## 总结
 
-其中，$$\boldsymbol{s}_t$$就是输出序列的hidden state，$$\boldsymbol{h}_i$$就是输入序列的hidden state。
+这些都是我个人总结出来的规律。从这个角度来理解Attention，发现特别轻松。
 
-所谓 **dot-product attention** 意思是 **将输入序列的hidden state和输出序列的hidden state相乘**。见上表的公式。
-
-所谓 **scaled dot-product attention** 是在 **dot-product attention** 的基础上，乘上一个 **缩放因子$$\frac{1}{\sqrt{n}}$$**，其中n代表模型的维度。优点在于这个缩放因子可以将函数值从softmax的饱和区拉回到非饱和区，这样可以防止梯度过小而很难学习。
-
-**self-attention** 也叫做 **intra_attention**。
+希望对大家有帮助。
