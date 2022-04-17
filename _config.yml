@@ -27,7 +27,7 @@ disqus:
 # Build settings
 markdown: kramdown
 highlighter: rouge # or pygments or null
-theme: jekyll-sleek
+remote_theme: chrisrhymes/bulma-clean-theme
 exclude:
   - README.md
   - node_modules
